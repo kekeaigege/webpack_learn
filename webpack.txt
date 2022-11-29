@@ -1,0 +1,191 @@
+https://www.bilibili.com/video/BV14T4y1z7sw?p=8&vd_source=33b87c875bc198a559a2501f47562358
+https://webpack.docschina.org/concepts/
+创建文件夹 src 创建main.js文件
+npm init -y  初始化webpack
+npm i webpack webpack-cli -D  //下载依赖
+npx webpack ./src/main.js --mode=development  //开发模式
+npx webpack ./src/main.js --mode=production //生产模式
+npx webpack ./src/main.js --mode=development //打包
+新建webpack.config.js
+const path = require('path');//nodejs
+module.exports={
+    //入口
+    entry:"./src/main.js",//相对路径
+    //输出
+    output:{
+        //输出路径
+        //代表当前文件的文件夹目录
+        path:path.resolve(__dirname,'dist'),//绝对路径
+        //输出名称
+        filename:'main.js'
+    },
+    module: {
+        rules: [
+            //loader的配置
+
+        ]
+    },
+    plugins: [],
+    mode:"development"
+}
+开发模式介绍
+开发模式顾名思义就是我们开发代码时使用的模式
+这个模式下我们主要做两件事
+1.编译代码，使浏览器能够识别
+开发时，我们有样式资源、字体资源、字体图标、图片资源、html资源 webpack模式不能处理这些，我们要配置
+编译这些资源
+2.代码质量检查
+提前检查代码隐患，让代码运行时更加有健壮性
+提前检查代码规范，统一团队编码风格，让代码更加优雅
+
+处理资源样式
+webpack不能识别样式资源 所以我们要借助Loader来帮助Webpack解析资源
+我们找到Loader都应该去官方文档中找到对应的Loader然后使用
+npm install --save-dev style-loader
+npm i sass-loader sass -D
+
+-----------
+处理图片资源
+小图片可以转换成base64模式
+ {
+        test: /\.txt/,
+        type: 'asset',
+
+       parser: {
+
+         dataUrlCondition: {
+
+           maxSize: 4 * 1024 // 4kb
+
+         }
+
+       }
+      }
+
+安装eslint插件
+//npm install eslint-webpack-plugin --save-dev
+//npm install eslint --save-dev
+//安装html插件
+//npm install --save-dev html-webpack-plugin  html资源插件
+//npm install -D babel-loader @babel/core @babel/preset-env webpack
+//开发服务自动化
+每次输入代码都需要手动编译才能打包
+npm i webpack-dev-server -D
+启动项目
+npx webpack serve
+
+
+//生产模式
+文件夹目录新建config文件
+config文件下配置dev开发模式和生产模式,将原来的绝对路径..进行回退
+命令行输入
+npx webpack serve --config ./config/webpack.dev.js
+
+css处理
+提取Css单独成文件
+Css文件目前被打包到js文件，当js文件加载时候，会创建一个style标签来生成样式
+这样对于网站来说会有闪屏现象，我们应该是单独的CSS文件，通过link标签加载性能才好
+MiniCssExtractPlugin
+npm install --save-dev mini-css-extract-plugin
+
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+
+module.exports = {
+  plugins: [new MiniCssExtractPlugin()],
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: [MiniCssExtractPlugin.loader, "css-loader"],
+      },
+    ],
+  },
+};
+
+//css兼容处理
+npm i postcss-loader postcss postcss-preset-env -D
+   {
+                        loader: 'postcss-loader',
+                        options: {
+                            postcssOptions: {
+                              plugins: [
+                                [
+                                  'postcss-preset-env',
+                                  {
+                                    // 其他选项
+                                  },
+                                ],
+                              ],
+                            },
+                          },
+                    }
+package.json文件中配置
+  "browserslist":[
+    "last 2 versions",
+    "> 1%",
+    "not dead"
+  ]
+
+//css压缩
+
+
+webpack高级
+//错误显示
+SourceMap :    
+devtool:"cheap-module-source-map"//开发模式
+devtool:"source-map"//生产模式
+
+//提升打包速度  模块热替换 默认值 开启   hot:false//关闭HML  不适合生产模式
+//Oneof 
+  rules: [{
+            oneOf: [{}]}]
+
+include 包含
+exclude排除
+
+
+Catch缓存
+new ESLintPlugin({
+        context: path.resolve(__dirname, '../src'),
+        exclude:"node_modules",//默认值
+        catch:true,
+        cacheLocation:path.resolve(__dirname, '../node_modules/.catch/eslintcatche')
+    })
+
+
+    {
+                test: /\.js$/,
+                exclude: /(node_modules)/, //排除node_modules中文件
+                loader: "babel-loader", //智能预设
+                options: {
+                    presets: ['@babel/preset-env'],
+                    catchDirectory:true,//开启babel缓存
+                    catchCompression:false//关闭缓存文件
+                }
+            }
+
+
+//多进程打包
+为什么打包速度越来越慢，js文件打包速度慢
+js文件处理主要是eslint、babel、Teser三个工具,所以想要提升打包速度就要启用多进程
+处理js文件 每个进程启用600ms开销
+
+怎么用 启用进程就是我们CPU核数 
+每个电脑不一样 需要获取cpu核数
+
+npm i thread-loader -D
+
+//减少babel生成体积
+npm i @babel/plugin-transform-runtime -D
+//压缩图片
+npm install image-minimizer-webpack-plugin imagemin --D
+//无损压缩
+npm install imagemin-gifsicle imagemin-jpegtran imagemin-optipng imagemin-svgo --D
+有损压缩
+npm install imagemin-gifsicle imagemin-mozjpeg imagemin-pngquant imagemin-svgo --D
+
+
+loader: 
+实际上就是webpack上的一个内置函数
+同步loader 异步Loader raw loader处理二进制数据，比如图片
+pitch loader 提前终止执行
